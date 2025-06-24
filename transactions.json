@@ -28,5 +28,11 @@
         "amount": 50000.0,
         "description": "tambahan",
         "date": "2025-06-24T12:19:06.410512"
+    },
+    {
+        "type": "expense",
+        "amount": 30000.0,
+        "description": "tes pengeluaran",
+        "date": "2025-06-24T12:31:42.554037"
     }
 ]

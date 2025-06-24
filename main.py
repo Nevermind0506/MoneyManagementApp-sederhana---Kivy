@@ -1,23 +1,20 @@
-# Tidak berubah: semua import sama
+
 import json
 import os
 from datetime import datetime
-from kivy.app import App
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.scrollview import ScrollView
-from kivy.uix.label import Label
-from kivy.uix.textinput import TextInput
-from kivy.uix.button import Button
+from kivymd.app import MDApp
+from kivymd.uix.boxlayout import MDBoxLayout
+from kivymd.uix.gridlayout import MDGridLayout
+from kivymd.uix.scrollview import MDScrollView
+from kivymd.uix.label import MDLabel
+from kivymd.uix.textfield import MDTextField
+from kivymd.uix.button import MDRaisedButton
 from kivy.core.window import Window
 from kivy.utils import get_color_from_hex
 from kivy.uix.popup import Popup
 from kivy.graphics import Color, RoundedRectangle
 
-
-
-
-class TransactionHistory(GridLayout):
+class TransactionHistory(MDGridLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.cols = 1
@@ -30,7 +27,7 @@ class TransactionHistory(GridLayout):
         card = TransactionCard(transaction)
         self.add_widget(card)
 
-class TransactionCard(BoxLayout):
+class TransactionCard(MDBoxLayout):
     def __init__(self, transaction, **kwargs):
         super().__init__(orientation='vertical', size_hint_y=None, height=110, padding=12, spacing=6, **kwargs)
 
@@ -40,38 +37,32 @@ class TransactionCard(BoxLayout):
         date_str = transaction.get('date', '')[:19].replace('T', ' ')
         is_income = ttype == 'income'
 
-        # Warna background dan teks
         color_bg = get_color_from_hex("#d1fae5") if is_income else get_color_from_hex("#fee2e2")
         color_text = get_color_from_hex("#064e3b") if is_income else get_color_from_hex("#7f1d1d")
 
-        # Background card bulat
         with self.canvas.before:
             Color(rgba=color_bg)
             self.rect = RoundedRectangle(radius=[10], size=self.size, pos=self.pos)
         self.bind(size=self._update_rect, pos=self._update_rect)
 
-        # Tipe transaksi
         title = "🟢 Pemasukan" if is_income else "🔴 Pengeluaran"
-        lbl_title = Label(text=title, color=color_text, bold=True, font_size=16,
-                          size_hint_y=None, height=22, halign='left', valign='middle')
+        lbl_title = MDLabel(text=title, theme_text_color="Custom", text_color=color_text, bold=True, font_style="H6",
+                            size_hint_y=None, height=22, halign='left', valign='middle')
         lbl_title.bind(size=lbl_title.setter('text_size'))
         self.add_widget(lbl_title)
 
-        # Tanggal
-        lbl_date = Label(text=f"Tanggal     : {date_str}", color=color_text,
-                         size_hint_y=None, height=20, halign='left', valign='middle')
+        lbl_date = MDLabel(text=f"📅 Tanggal     : {date_str}", theme_text_color="Custom", text_color=color_text,
+                           size_hint_y=None, height=20, halign='left', valign='middle')
         lbl_date.bind(size=lbl_date.setter('text_size'))
         self.add_widget(lbl_date)
 
-        # Jumlah
-        lbl_amount = Label(text=f"Jumlah      : Rp {amount:,.0f}", color=color_text,
-                           size_hint_y=None, height=20, halign='left', valign='middle')
+        lbl_amount = MDLabel(text=f"💵 Jumlah      : Rp {amount:,.0f}", theme_text_color="Custom", text_color=color_text,
+                             size_hint_y=None, height=20, halign='left', valign='middle')
         lbl_amount.bind(size=lbl_amount.setter('text_size'))
         self.add_widget(lbl_amount)
 
-        # Keterangan
-        lbl_desc = Label(text=f"Keterangan  : {desc}", color=color_text,
-                         size_hint_y=None, height=20, halign='left', valign='middle')
+        lbl_desc = MDLabel(text=f"📝 Keterangan  : {desc}", theme_text_color="Custom", text_color=color_text,
+                           size_hint_y=None, height=20, halign='left', valign='middle')
         lbl_desc.bind(size=lbl_desc.setter('text_size'))
         self.add_widget(lbl_desc)
 
@@ -79,7 +70,32 @@ class TransactionCard(BoxLayout):
         self.rect.pos = self.pos
         self.rect.size = self.size
 
-class FinanceTrackerApp(App):
+class InputCard(MDBoxLayout):
+    def __init__(self, title, amount_input, desc_input, button, bg_color="#f3f4f6", **kwargs):
+        super().__init__(orientation='vertical', size_hint_y=None, height=140, padding=12, spacing=8, **kwargs)
+
+        with self.canvas.before:
+            Color(rgba=get_color_from_hex(bg_color))
+            self.rect = RoundedRectangle(radius=[12], size=self.size, pos=self.pos)
+        self.bind(size=self._update_rect, pos=self._update_rect)
+
+        lbl = MDLabel(text=title, size_hint_y=None, height=24, bold=True, theme_text_color="Custom",
+                      text_color=[0.1, 0.1, 0.1, 1], halign='left')
+        lbl.bind(size=lbl.setter('text_size'))
+        self.add_widget(lbl)
+
+        form_row = MDBoxLayout(orientation='horizontal', size_hint_y=None, height=40, spacing=8)
+        form_row.add_widget(amount_input)
+        form_row.add_widget(desc_input)
+        self.add_widget(form_row)
+
+        self.add_widget(button)
+
+    def _update_rect(self, instance, value):
+        self.rect.pos = instance.pos
+        self.rect.size = instance.size
+
+class FinanceTrackerApp(MDApp):
     def build(self):
         self.title = "Pencatat Keuangan Harian"
         Window.size = (400, 700)
@@ -89,53 +105,41 @@ class FinanceTrackerApp(App):
         self.filtered_transactions = []
         self.balance = 0.0
 
-        root_layout = BoxLayout(orientation='vertical', padding=16, spacing=12)
+        root_layout = MDBoxLayout(orientation='vertical', padding=[16, 20, 16, 20], spacing=16)
 
-        # === Input Pemasukan ===
-        root_layout.add_widget(Label(text='Input Pemasukan:', size_hint_y=None, height=24, bold=True))
-        income_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=40, spacing=8)
-        self.income_amount = TextInput(hint_text='Jumlah (misal: 50000)', multiline=False, input_filter='int')
-        self.income_desc = TextInput(hint_text='Keterangan', multiline=False)
-        income_box.add_widget(self.income_amount)
-        income_box.add_widget(self.income_desc)
-        root_layout.add_widget(income_box)
-
-        # === Input Pengeluaran ===
-        root_layout.add_widget(Label(text='Input Pengeluaran:', size_hint_y=None, height=24, bold=True))
-        expense_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=40, spacing=8)
-        self.expense_amount = TextInput(hint_text='Jumlah (misal: 15000)', multiline=False, input_filter='int')
-        self.expense_desc = TextInput(hint_text='Keterangan', multiline=False)
-        expense_box.add_widget(self.expense_amount)
-        expense_box.add_widget(self.expense_desc)
-        root_layout.add_widget(expense_box)
-
-        # === Tombol Pemasukan / Pengeluaran ===
-        buttons_box = BoxLayout(size_hint_y=None, height=45, spacing=12)
-        btn_add_income = Button(text='+ Pemasukan', background_color=get_color_from_hex('#10b981'))
+        # Input Pemasukan
+        self.income_amount = MDTextField(hint_text='Input Pemasukan', input_filter='int', mode="rectangle")
+        self.income_desc = MDTextField(hint_text='Keterangan', mode="rectangle")
+        btn_add_income = MDRaisedButton(text='➕ Tambah Pemasukan', md_bg_color=get_color_from_hex('#10b981'), text_color=[1,1,1,1])
         btn_add_income.bind(on_press=self.add_income)
-        btn_add_expense = Button(text='- Pengeluaran', background_color=get_color_from_hex('#ef4444'))
-        btn_add_expense.bind(on_press=self.add_expense)
-        buttons_box.add_widget(btn_add_income)
-        buttons_box.add_widget(btn_add_expense)
-        root_layout.add_widget(buttons_box)
+        income_card = InputCard("", self.income_amount, self.income_desc, btn_add_income, bg_color="#e0f7f0")
+        root_layout.add_widget(income_card)
 
-        # === Saldo ===
-        self.balance_label = Label(text='Saldo Saat Ini: Rp 0', font_size=22, size_hint_y=None, height=40, bold=True, color=[1,1,1,1])
+        # Input Pengeluaran
+        self.expense_amount = MDTextField(hint_text='Input Pengeluaran', input_filter='int', mode="rectangle")
+        self.expense_desc = MDTextField(hint_text='Keterangan', mode="rectangle")
+        btn_add_expense = MDRaisedButton(text='➖ Tambah Pengeluaran', md_bg_color=get_color_from_hex('#ef4444'), text_color=[1,1,1,1])
+        btn_add_expense.bind(on_press=self.add_expense)
+        expense_card = InputCard("", self.expense_amount, self.expense_desc, btn_add_expense, bg_color="#fcebea")
+        root_layout.add_widget(expense_card)
+
+        # Saldo
+        self.balance_label = MDLabel(text='💰 Saldo Saat Ini: Rp 0', font_style="H5", size_hint_y=None, height=40, bold=True, theme_text_color="Custom", text_color=[0,0,0,1])
         root_layout.add_widget(self.balance_label)
 
-        # === Riwayat Transaksi ===
-        root_layout.add_widget(Label(text='Riwayat Transaksi:', size_hint_y=None, height=24, bold=True))
-        # === Pencarian Riwayat ===
-        search_box = BoxLayout(size_hint_y=None, height=40)
-        self.search_input = TextInput(hint_text='Cari transaksi (misal: jajan)', multiline=False)
+        # Riwayat Transaksi
+        root_layout.add_widget(MDLabel(text='Riwayat Transaksi:', size_hint_y=None, height=24, bold=True, theme_text_color="Primary"))
+
+        # Pencarian Riwayat
+        search_box = MDBoxLayout(size_hint_y=None, height=40)
+        self.search_input = MDTextField(hint_text='Cari transaksi (misal: jajan)', mode="rectangle")
         self.search_input.bind(text=self.on_search_text)
         search_box.add_widget(self.search_input)
-        root_layout.add_widget(Label(text='Pencarian:', size_hint_y=None, height=24))
+        root_layout.add_widget(MDLabel(text='', size_hint_y=None, height=24, bold=True, theme_text_color="Primary"))
         root_layout.add_widget(search_box)
 
-
         self.history = TransactionHistory()
-        scroll = ScrollView(size_hint=(1, 1))
+        scroll = MDScrollView(size_hint=(1, 1))
         scroll.add_widget(self.history)
         root_layout.add_widget(scroll)
 
@@ -198,7 +202,7 @@ class FinanceTrackerApp(App):
         self.expense_desc.text = ''
 
     def update_balance_label(self):
-        self.balance_label.text = f"Saldo Saat Ini: Rp {self.balance:,.0f}"
+        self.balance_label.text = f"💰 Saldo Saat Ini: Rp {self.balance:,.0f}"
 
     def save_transactions(self):
         try:
@@ -226,7 +230,7 @@ class FinanceTrackerApp(App):
     def populate_history(self, filtered=False):
         self.history.clear_widgets()
         data = self.filtered_transactions if filtered else self.transactions
-        for transaction in reversed(data):  # terbaru di atas
+        for transaction in reversed(data):
             self.history.add_transaction(transaction)
     
     def on_search_text(self, instance, value):
@@ -242,11 +246,10 @@ class FinanceTrackerApp(App):
             ]
         self.populate_history(filtered=True)
 
-
     def show_error(self, message):
-        content = BoxLayout(orientation='vertical', padding=10, spacing=10)
-        content.add_widget(Label(text=message))
-        btn = Button(text='Tutup', size_hint_y=None, height=40)
+        content = MDBoxLayout(orientation='vertical', padding=10, spacing=10)
+        content.add_widget(MDLabel(text=message, theme_text_color="Error"))
+        btn = MDRaisedButton(text='Tutup', md_bg_color=get_color_from_hex('#ef4444'), text_color=[1,1,1,1], size_hint_y=None, height=40)
         content.add_widget(btn)
         popup = Popup(title='Kesalahan', content=content, size_hint=(None, None), size=(300, 200))
         btn.bind(on_press=popup.dismiss)
