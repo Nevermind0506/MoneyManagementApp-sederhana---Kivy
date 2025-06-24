@@ -1,0 +1,14 @@
+[
+    {
+        "type": "income",
+        "amount": 100000.0,
+        "description": "uang saku mingguan",
+        "date": "2025-06-17T10:04:07.570740"
+    },
+    {
+        "type": "expense",
+        "amount": 15000.0,
+        "description": "geprek kantin",
+        "date": "2025-06-17T10:04:22.469611"
+    }
+]
