@@ -2,13 +2,31 @@
     {
         "type": "income",
         "amount": 100000.0,
-        "description": "uang saku mingguan",
-        "date": "2025-06-17T10:04:07.570740"
+        "description": "saku mingguan",
+        "date": "2025-06-24T11:49:58.938011"
+    },
+    {
+        "type": "income",
+        "amount": 10000.0,
+        "description": "Uang Saku Mingguan",
+        "date": "2025-06-24T11:57:54.447623"
     },
     {
         "type": "expense",
         "amount": 15000.0,
-        "description": "geprek kantin",
-        "date": "2025-06-17T10:04:22.469611"
+        "description": "Makan Geprek",
+        "date": "2025-06-24T11:58:17.261704"
+    },
+    {
+        "type": "income",
+        "amount": 10000.0,
+        "description": "tes",
+        "date": "2025-06-24T12:08:52.313694"
+    },
+    {
+        "type": "income",
+        "amount": 50000.0,
+        "description": "tambahan",
+        "date": "2025-06-24T12:19:06.410512"
     }
 ]
